@@ -72,7 +72,29 @@ const refresToken = () => {
         response.json()
           .then(res => {
             console.log(res);
-            localStorage.setItem("access_token", res.access_token);
+            localStorage.setItem("token_access", res.access_token);
+          })
+          .catch(err => console.log(err));
+      }
+    })
+    .catch(err => console.log(err));
+}
+
+const getCalendarList = () => {
+  let formData = new FormData();
+  formData.append("token", localStorage.getItem("token_access"));
+  formData.append("refresh", localStorage.getItem("refresh_token"));
+
+  fetch("client/client.php", {
+    method: "POST",
+    body: formData
+  })
+    .then(response => {
+      console.log(response);
+      if (response.ok) {
+        response.json()
+          .then(res => {
+            console.log(res);
           })
           .catch(err => console.log(err));
       }
