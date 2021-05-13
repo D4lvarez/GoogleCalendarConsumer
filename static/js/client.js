@@ -1,86 +1,90 @@
-const url = window.location.search;
-const urlParams = new URLSearchParams(url);
-
-const auth_token = urlParams.get("code");
-const client_id =
-  "561037342448-7698atk72j4ma0jb7gsbr1vdl698q61r.apps.googleusercontent.com";
-const client_secret = "CsoDNyz1KpqU5v6hOgQ-BXnc";
-const redirect_uri = "http%3A//localhost/ibsell/google-calendar/client.html";
-
-fetch("https://oauth2.googleapis.com/token", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/x-www-form-urlencoded",
-  },
-  body: `code=${auth_token}&client_id=${client_id}&client_secret=${client_secret}&redirect_uri=${redirect_uri}&grant_type=authorization_code`,
-})
-  .then((response) => {
-    response
-      .json()
-      .then((res) => {
-        console.log(res.access_token);
-        if (localStorage.getItem("access_token").length === 0) {
-          localStorage.setItem("access_token", res.access_token);
-          localStorage.setItem("refresh_token", res.refresh_token);
-        }
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  })
-  .catch((error) => {
-    console.log(error);
-  });
-
-function refreshToken() {
-  let refresh = JSON.stringify(localStorage.getItem("refresh_token"));
+const getToken = () => {
+  const client_id = "561037342448-7698atk72j4ma0jb7gsbr1vdl698q61r.apps.googleusercontent.com";
+  const client_secret = "CsoDNyz1KpqU5v6hOgQ-BXnc";
+  const redirect_uri = "http%3A//localhost/ibsell/google-calendar/index.html";
+  const code = localStorage.getItem("code_auth");
   fetch("https://oauth2.googleapis.com/token", {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
     },
-    body: `client_id=${client_id}&client_secret=${client_secret}&refresh_token=${refresh}&grant_type=refresh_token`,
+    body: `code=${code}&client_id=${client_id}&client_secret=${client_secret}&redirect_uri=${redirect_uri}&grant_type=authorization_code`,
   })
-    .then((response) => {
-      response
-        .json()
-        .then((res) => {
-          localStorage.setItem("access_token", res.access_token);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
+    .then(response => {
+      console.log("Primer Response")
+      console.log(response);
+      if (response.ok) {
+        response.json()
+          .then(res => {
+            console.log(res);
+            if (localStorage.getItem("load") == 0) {
+              localStorage.setItem("load", 1);
+              localStorage.setItem("token_access", res.access_token);
+              localStorage.setItem("refresh_token", res.refresh_token);
+            }
+          })
+          .catch(err => {
+            console.log(err);
+          })
+      } else {
+        response.json()
+          .then(res => {
+            console.log(res)
+          })
+      }
     })
-    .catch((error) => {
-      console.log(error);
-    });
-
-  setTimeout(refreshToken, 3599000);
+    .then(res => {
+      console.log(res);
+    })
+    .catch(err => {
+      console.log(err);
+    })
 }
 
-refreshToken();
+const getCode = () => {
+  let urlParams = window.location.search; // If url no have params is equal to a empty string
+  if (urlParams.length !== 0) {
+    let params = new URLSearchParams(urlParams);
+    let code = params.get("code");
+    localStorage.setItem("load", 0); // Set a counter to handle reloads
+    if (localStorage.getItem("code_auth") === null) {
+      localStorage.setItem("code_auth", code);
+    }
+  }
+}
 
-const button = document.querySelector("#getEvents");
-const secction = document.querySelector("#events");
-const data = new FormData();
-data.append(
-  "access_token",
-  JSON.stringify(localStorage.getItem("access_token"))
-);
-console.log(localStorage.getItem("access_token"));
-button.addEventListener("click", async function () {
-  let response = await fetch("./client/client.php", {
+const refresToken = () => {
+  const urlRefresh = "https://oauth2.googleapis.com/token";
+  const client_id = "561037342448-7698atk72j4ma0jb7gsbr1vdl698q61r.apps.googleusercontent.com";
+  const client_secret = "CsoDNyz1KpqU5v6hOgQ-BXnc";
+  const refresh_token = localStorage.getItem("refresh_token");
+
+  fetch(urlRefresh, {
     method: "POST",
-    body: data,
-  });
-
-  response
-    .json()
-    .then((res) => {
-      console.log(res.data);
-      secction.innerHTML = res.data.kind;
+    headers: {
+      "Content-Type": "x-www-urlencoded"
+    },
+    body: `client_id=${client_id}&=client_secret=${client_secret}&refresh_token=${refresh_token}&grant_type=refresh_token`
+  })
+    .then(response => {
+      console.log(response);
+      if (response.ok) {
+        response.json()
+          .then(res => {
+            console.log(res);
+            localStorage.setItem("access_token", res.access_token);
+          })
+          .catch(err => console.log(err));
+      }
     })
-    .catch((err) => {
-      console.log(err);
-    });
-});
+    .catch(err => console.log(err));
+}
+
+document.addEventListener("load", getCode());
+const buttonToken = document.querySelector("#handleToken");
+if (localStorage.getItem("code_auth") !== null) {
+  buttonToken.style.display = "block";
+  buttonToken.addEventListener("click", getToken);
+  document.querySelector("#oauth").style.display = "none";
+}
+
