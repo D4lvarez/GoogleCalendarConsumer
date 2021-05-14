@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Event</title>
+</head>
+
+<body>
+  <form method="POST">
+    <div>
+      <p>Send Notifications?</p>
+      <input type="radio" id="yes" name="notify" value="true">
+      <label for="yes">Yes</label><br>
+      <input type="radio" id="no" name="notify" value="false">
+      <label for="no">No</label><br>
+    </div>
+
+    <div>
+      <label for="start">Start: </label>
+      <input type="datetime-local" name="start" id="start">
+      <label for="end">End: </label>
+      <input type="datetime-local" name="end" id="end">
+    </div>
+
+    <div>
+      <label for="desc">Description: </label>
+      <input type="text" name="desc" id="desc">
+    </div>
+
+    <div style="margin-top: 15px;">
+      <label for="attendees">Add attendees: </label>
+      <textarea name="attendees" id="attendees" rows="15" cols="30"
+        placeholder="example@gmail.com, example2@gmail.com, ..."></textarea>
+    </div>
+
+    <div>
+      <label for="title">Title: </label>
+      <input type="text" name="title" id="title">
+    </div>
+
+    <div>
+      <button type="submit">Create</button>
+    </div>
+  </form>
+  <script src="static/js/events.js"></script>
+</body>
+
+</html>
