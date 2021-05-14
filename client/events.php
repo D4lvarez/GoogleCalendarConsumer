@@ -1,6 +1,7 @@
 <?php
 
 require_once "token.php";
+require_once "../database/database.php";
 
 $token = $_POST["token"];
 $refresh_token = $_POST["refresh"];
@@ -53,6 +54,13 @@ function createEvent(string $url, string $tokenAccess, array $values)
 	curl_setopt($request, CURLOPT_POST, true);
 	curl_setopt($request, CURLOPT_POSTFIELDS, json_encode($values));
 	$response = curl_exec($request);
+	
+	$db = new Database("localhost", "google", "code", "password");
+	$db->insert_data([
+		$values["summary"],
+		$values["description"],
+		$response
+	]);
 	$response = json_decode($response, true);
 	echo formatResponse($response, $tokenAccess);
 }
@@ -87,7 +95,6 @@ if ($reason == "insert") {
 		array_merge($members, $members[$user]);
 	}
 	$data["attendees"] = $members;
-	var_dump($data);
 	createEvent($create_events, $token, $data);
 }
 
