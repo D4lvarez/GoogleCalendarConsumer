@@ -29,6 +29,20 @@ function listEvents(string $url, string $tokenAccess)
 	echo formatResponse($data, $tokenAccess);
 }
 
+function getTimeZone(string $tokenAcces)
+{
+	$request = curl_init("https://www.googleapis.com/calendar/v3/users/me/settings/timezone");
+	curl_setopt($request, CURLOPT_HTTPHEADER, [
+		"Authorization: Bearer $tokenAcces"
+	]);
+	curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
+	$response = curl_exec($request);
+	curl_close($request);
+	$response = json_decode($response, true);
+	return $response["value"];
+
+}
+
 function createEvent(string $url, string $tokenAccess, array $values)
 {
 	$request = curl_init($url);
@@ -37,29 +51,43 @@ function createEvent(string $url, string $tokenAccess, array $values)
 	]);
 	curl_setopt($request, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($request, CURLOPT_POST, true);
-	curl_setopt($request, CURLOPT_POSTFIELDS, http_build_query($values));
+	curl_setopt($request, CURLOPT_POSTFIELDS, json_encode($values));
 	$response = curl_exec($request);
 	$response = json_decode($response, true);
 	echo formatResponse($response, $tokenAccess);
 }
 
-$token = testToken($token, $refresh_token, $list_events, $CLIENT_ID, $CLIENT_SECRET);
 
 if ($reason == "list") {
+	$token = testToken($token, $refresh_token, $list_events, $CLIENT_ID, $CLIENT_SECRET);
 	listEvents($list_events, $token);
 }
 
 if ($reason == "insert") {
+	$token = testToken($token, $refresh_token, $list_events, $CLIENT_ID, $CLIENT_SECRET);
 	$attendees = explode(",", $_POST["attendees"]);
+	$userTimezone = getTimeZone($token);
+
 	$data = [
-		"sendUpdates" => $_POST["notify"] == "true" ? "all" : "none",
-		"start" => strtotime($_POST["start"]),
-		"end" => strtotime($_POST["end"]),
+		"sendUpdates" => $_POST["notify"],
+		"start" => [
+			"dateTime" => $_POST["start"] . ":00",
+			"timeZone" => $userTimezone
+		],
+		"end" => [
+			"dateTime" => $_POST["end"] . ":00",
+			"timeZone" => $userTimezone
+		],
 		"description" => $_POST["desc"],
 		"summary" => $_POST["title"],
-		"attendees" => $attendees,
-		// "attendees.email" => $attendees
 	];
+	$members = array();
+	foreach($attendees as $user) {
+		$members[$user] = ["email" => $user];
+		array_merge($members, $members[$user]);
+	}
+	$data["attendees"] = $members;
+	var_dump($data);
 	createEvent($create_events, $token, $data);
 }
 
