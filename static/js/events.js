@@ -18,6 +18,9 @@ document.querySelector("form").addEventListener("submit", function (event) {
         response.json()
           .then(res => {
             console.log(res);
+            document.querySelector("#event-data").innerHTML += `<a href="${res.data.htmlLink}" target="_blank">Event</a><br>
+                                                                  <p>${res.data.start.dateTime}</p>  <p>${res.data.end.dateTime}</p><br>
+                                                                  <p>${res.data.summary}</p> <p>${res.data.creator}</p>`
           })
           .catch(err => {
             console.log(err);

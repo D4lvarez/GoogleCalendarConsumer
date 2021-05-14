@@ -11,9 +11,9 @@
   <form method="POST">
     <div>
       <p>Send Notifications?</p>
-      <input type="radio" id="yes" name="notify" value="true">
+      <input type="radio" id="yes" name="notify" value="all">
       <label for="yes">Yes</label><br>
-      <input type="radio" id="no" name="notify" value="false">
+      <input type="radio" id="no" name="notify" value="none">
       <label for="no">No</label><br>
     </div>
 
@@ -44,6 +44,7 @@
       <button type="submit">Create</button>
     </div>
   </form>
+  <div id="event-data"></div>
   <script src="static/js/events.js"></script>
 </body>
 
